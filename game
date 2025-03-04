@@ -1,0 +1,28 @@
+const express = require('express');
+const { createProxyMiddleware } = require('http-proxy-middleware');
+const cors = require('cors');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(cors());
+
+// Proxy configuration
+app.use(
+  '/proxy',
+  createProxyMiddleware({
+    target: 'https://example.com', // Change to the target site
+    changeOrigin: true,
+    pathRewrite: {
+      '^/proxy': '',
+    },
+  })
+);
+
+app.get('/', (req, res) => {
+  res.send('Simple Proxy Server is running!');
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
