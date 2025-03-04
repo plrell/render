@@ -1,28 +1,47 @@
-const express = require('express');
-const { createProxyMiddleware } = require('http-proxy-middleware');
-const cors = require('cors');
+let grid;
+let cols, rows;
+let cellSize = 40;
+let selectedBlock = 1;
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+function setup() {
+  createCanvas(800, 600);
+  cols = width / cellSize;
+  rows = height / cellSize;
+  grid = Array.from({ length: rows }, () => Array(cols).fill(0));
+}
 
-app.use(cors());
+function draw() {
+  background(135, 206, 235);
+  drawGrid();
+}
 
-// Proxy configuration
-app.use(
-  '/proxy',
-  createProxyMiddleware({
-    target: 'https://example.com', // Change to the target site
-    changeOrigin: true,
-    pathRewrite: {
-      '^/proxy': '',
-    },
-  })
-);
+function drawGrid() {
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      stroke(0);
+      fill(getBlockColor(grid[y][x]));
+      rect(x * cellSize, y * cellSize, cellSize, cellSize);
+    }
+  }
+}
 
-app.get('/', (req, res) => {
-  res.send('Simple Proxy Server is running!');
-});
+function getBlockColor(type) {
+  switch (type) {
+    case 1: return color(139, 69, 19); // Dirt
+    case 2: return color(34, 139, 34); // Grass
+    default: return color(200);
+  }
+}
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+function mousePressed() {
+  let x = floor(mouseX / cellSize);
+  let y = floor(mouseY / cellSize);
+  if (x >= 0 && x < cols && y >= 0 && y < rows) {
+    grid[y][x] = selectedBlock;
+  }
+}
+
+function keyPressed() {
+  if (key === '1') selectedBlock = 1; // Dirt
+  if (key === '2') selectedBlock = 2; // Grass
+}
